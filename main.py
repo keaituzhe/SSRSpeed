@@ -105,7 +105,7 @@ if (__name__ == "__main__"):
 	setUpstreamPort(LOCAL_PORT)
 
 	DEBUG = False
-	CONFIG_LOAD_MODE = 1 #1 for guiconfig,2 for subscription url
+	CONFIG_LOAD_MODE = 0 #0 for import result,1 for guiconfig,2 for subscription url
 	CONFIG_FILENAME = "gui-config.json"
 	CONFIG_URL = ""
 	IMPORT_FIEENAME = ""
@@ -141,7 +141,9 @@ if (__name__ == "__main__"):
 		parser.print_help()
 		exit(0)
 
-	if (options.guiConfig):
+	if (options.import_file):
+		CONFIG_LOAD_MODE = 0
+	elif (options.guiConfig):
 		CONFIG_LOAD_MODE = 1
 		CONFIG_FILENAME = options.guiConfig
 	elif(options.url):
@@ -158,7 +160,7 @@ if (__name__ == "__main__"):
 	if (options.export_file_type):
 		EXPORT_TYPE = options.export_file_type.lower()
 
-	if (options.import_file):
+	if (options.import_file && CONFIG_LOAD_MODE == 0):
 		IMPORT_FIEENAME = options.import_file
 		export(importResult.importResult(IMPORT_FIEENAME),EXPORT_TYPE)
 		sys.exit(0)
