@@ -160,7 +160,7 @@ if (__name__ == "__main__"):
 	if (options.export_file_type):
 		EXPORT_TYPE = options.export_file_type.lower()
 
-	if (options.import_file && CONFIG_LOAD_MODE == 0):
+	if (options.import_file and CONFIG_LOAD_MODE == 0):
 		IMPORT_FIEENAME = options.import_file
 		export(importResult.importResult(IMPORT_FIEENAME),EXPORT_TYPE)
 		sys.exit(0)
@@ -203,6 +203,7 @@ if (__name__ == "__main__"):
 		_item["group"] = config["group"]
 		_item["remarks"] = config["remarks"]
 		ssr.startSsr(config)
+		print("Starting test for %s - %s" % (_item["group"],_item["remarks"]))
 		time.sleep(1)
 		try:
 			st = SpeedTest()
@@ -217,7 +218,7 @@ if (__name__ == "__main__"):
 		except Exception:
 			ssr.stopSsr()
 			socks2httpServer.shutdown()
-			socks2httpServer = None
+			print("Socks2HTTP Server already shutdown.")
 			traceback.print_exc()
 			sys.exit(1)
 		ssr.stopSsr()
@@ -227,5 +228,6 @@ if (__name__ == "__main__"):
 	ssr.stopSsr()
 	if (socks2httpServer):
 		socks2httpServer.shutdown()
+		print("Socks2HTTP Server already shutdown.")
 #	ssr.stopSsr()
 
