@@ -108,7 +108,7 @@ if (__name__ == "__main__"):
 	CONFIG_LOAD_MODE = 0 #0 for import result,1 for guiconfig,2 for subscription url
 	CONFIG_FILENAME = "gui-config.json"
 	CONFIG_URL = ""
-	IMPORT_FIEENAME = ""
+	IMPORT_FILENAME = ""
 	FILTER_KEYWORD = ""
 	FILTER_GROUP_KRYWORD = ""
 	FILTER_REMARK_KEYWORD = ""
@@ -149,6 +149,9 @@ if (__name__ == "__main__"):
 	elif(options.url):
 		CONFIG_LOAD_MODE = 2
 		CONFIG_URL = options.url
+	else:
+		print("No config input,exiting...")
+		sys.exit(1)
 
 	if (options.filter):
 		FILTER_KEYWORD = options.filter
@@ -161,8 +164,8 @@ if (__name__ == "__main__"):
 		EXPORT_TYPE = options.export_file_type.lower()
 
 	if (options.import_file and CONFIG_LOAD_MODE == 0):
-		IMPORT_FIEENAME = options.import_file
-		export(importResult.importResult(IMPORT_FIEENAME),EXPORT_TYPE)
+		IMPORT_FILENAME = options.import_file
+		export(importResult.importResult(IMPORT_FILENAME),EXPORT_TYPE)
 		sys.exit(0)
 
 	socks2httpServer = ThreadingTCPServer((LOCAL_ADDRESS,FAST_PORT),SocksProxy)
@@ -171,7 +174,7 @@ if (__name__ == "__main__"):
 
 	ssrp = SSRParse()
 	if (CONFIG_LOAD_MODE == 1):
-		ssrp.readGuiConfig()
+		ssrp.readGuiConfig(CONFIG_FILENAME)
 	else:
 		ssrp.readSubscriptionConfig(CONFIG_URL)
 	ssrp.filterNode(FILTER_KEYWORD,FILTER_GROUP_KRYWORD,FILTER_REMARK_KEYWORD)

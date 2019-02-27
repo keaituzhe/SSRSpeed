@@ -135,8 +135,8 @@ class SSRParse(object):
 			link = link[6:]
 			self.__configList.append(self.__parseLink(link))
 			
-	def readGuiConfig(self):
-		with open("./gui-config.json","r",encoding="utf-8") as f:
+	def readGuiConfig(self,filename):
+		with open(filename,"r",encoding="utf-8") as f:
 			for item in json.load(f)["configs"]:
 				_dict = {
 					"server":item["server"],

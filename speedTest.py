@@ -50,7 +50,7 @@ class SpeedTest(object):
 			print(s.get_best_server())
 			print("Testing Download...")
 			s.download()
-			result = s.result.dict()
+			result = s.results.dict()
 			self.__initSocket()
 			return result["download"] / 8 #bits to bytes
 		elif (method == "FAST"):
