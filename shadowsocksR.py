@@ -40,6 +40,7 @@ class SSR(object):
 			else:
 				print("Your system does not supported.Please contact developer.")
 				sys.exit(1)
+			print("Starting ShadowsocksR with server %s:%d" % (config["server"],config["server_port"]))
 
 		#	print(self.__process.returncode)
 
@@ -49,6 +50,7 @@ class SSR(object):
 			self.__process.terminate()
 	#		print (self.__process.returncode)
 			self.__process = None
+			print("ShadowsocksR terminated.")
 	#	self.__ssrProcess.terminate()
 
 
@@ -57,7 +59,7 @@ class SSRParse(object):
 		self.__configList = []
 
 	def __parseLink(self,link):
-		decoded = b64plus.decode(url).decode("utf-8")
+		decoded = b64plus.decode(link).decode("utf-8")
 		decoded1 = decoded.split("/?")[0].split(":")
 		decoded2 = decoded.split("/?")[1].split("&")
 		_config = {

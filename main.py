@@ -166,8 +166,8 @@ if (__name__ == "__main__"):
 		sys.exit(0)
 
 	socks2httpServer = ThreadingTCPServer((LOCAL_ADDRESS,FAST_PORT),SocksProxy)
-	_thread.start_new_thread(socks2httpServer.serve_forever,())
-	print("socks2http server started.")
+	#_thread.start_new_thread(socks2httpServer.serve_forever,())
+	#print("socks2http server started.")
 
 	ssrp = SSRParse()
 	if (CONFIG_LOAD_MODE == 1):
@@ -206,6 +206,8 @@ if (__name__ == "__main__"):
 		print("Starting test for %s - %s" % (_item["group"],_item["remarks"]))
 		time.sleep(1)
 		try:
+			_thread.start_new_thread(socks2httpServer.serve_forever,())
+			print("socks2http server started.")
 			st = SpeedTest()
 			_item["dspeed"] = st.startTest(TEST_METHOD)
 			latencyTest = st.tcpPing(config["server"],config["server_port"])
@@ -215,6 +217,8 @@ if (__name__ == "__main__"):
 			_item["gping"] = st.googlePing()
 			Result.append(_item)
 			print("%s - %s - Loss:%s%% - TCP_Ping:%d - Google_Ping:%d - Speed:%.2f" % (_item["group"],_item["remarks"],_item["loss"] * 100,int(_item["ping"] * 1000),int(_item["gping"] * 1000),_item["dspeed"] / 1024 / 1024) + "MB")
+			socks2httpServer.shutdown()
+			print("Socks2HTTP Server already shutdown.")
 		except Exception:
 			ssr.stopSsr()
 			socks2httpServer.shutdown()
@@ -229,5 +233,6 @@ if (__name__ == "__main__"):
 	if (socks2httpServer):
 		socks2httpServer.shutdown()
 		print("Socks2HTTP Server already shutdown.")
+	sys.exit(0)
 #	ssr.stopSsr()
 
