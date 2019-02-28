@@ -182,7 +182,7 @@ def pingtcptest(host,port):
             alt+=time.time()-st
             suc+=1
         except Exception as err:
-            logging.exception("")
+            logging.exception("TCP Ping Exception:")
             fac+=1
     if suc==0:
         return (0,0)
@@ -205,6 +205,6 @@ def pinggoogletest(port=1080):
             s.close()
             alt+=time.time()-st
         except Exception as err:
-            logging.exception("")
+            logging.exception("Google Ping Exception:")
             alt+=10000
     return alt/2

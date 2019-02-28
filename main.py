@@ -12,8 +12,8 @@ from shadowsocksR import SSRParse,SSR
 from speedTest import SpeedTest,setInfo
 from exportResult import exportAsPng,exportAsJson
 import importResult
-from socks2http import ThreadingTCPServer,SocksProxy
-from socks2http import setUpstreamPort
+#from socks2http import ThreadingTCPServer,SocksProxy
+#from socks2http import setUpstreamPort
 
 VERSION = "0.1b"
 LOCAL_ADDRESS = "127.0.0.1"
@@ -103,7 +103,7 @@ def export(Result,exType):
 
 if (__name__ == "__main__"):
 	setInfo(LOCAL_ADDRESS,LOCAL_PORT,FAST_PORT)
-	setUpstreamPort(LOCAL_PORT)
+	#setUpstreamPort(LOCAL_PORT)
 
 	DEBUG = False
 	CONFIG_LOAD_MODE = 0 #0 for import result,1 for guiconfig,2 for subscription url
@@ -172,7 +172,7 @@ if (__name__ == "__main__"):
 		export(importResult.importResult(IMPORT_FILENAME),EXPORT_TYPE)
 		sys.exit(0)
 
-	socks2httpServer = ThreadingTCPServer((LOCAL_ADDRESS,FAST_PORT),SocksProxy)
+	#socks2httpServer = ThreadingTCPServer((LOCAL_ADDRESS,FAST_PORT),SocksProxy)
 	#_thread.start_new_thread(socks2httpServer.serve_forever,())
 	#print("socks2http server started.")
 
@@ -213,10 +213,14 @@ if (__name__ == "__main__"):
 		logging.info("Starting test for %s - %s" % (_item["group"],_item["remarks"]))
 		time.sleep(1)
 		try:
-			_thread.start_new_thread(socks2httpServer.serve_forever,())
-			logging.debug("socks2http server started.")
+			#_thread.start_new_thread(socks2httpServer.serve_forever,())
+			#logging.debug("socks2http server started.")
 			st = SpeedTest()
 			_item["dspeed"] = st.startTest(TEST_METHOD)
+			time.sleep(0.2)
+			ssr.stopSsr()
+			ssr.startSsr(config)
+			time.sleep(1)
 			latencyTest = st.tcpPing(config["server"],config["server_port"])
 		#	.print (latencyTest)
 			_item["loss"] = 1 - latencyTest[1]
@@ -224,12 +228,12 @@ if (__name__ == "__main__"):
 			_item["gping"] = st.googlePing()
 			Result.append(_item)
 			logging.info("%s - %s - Loss:%s%% - TCP_Ping:%d - Google_Ping:%d - Speed:%.2f" % (_item["group"],_item["remarks"],_item["loss"] * 100,int(_item["ping"] * 1000),int(_item["gping"] * 1000),_item["dspeed"] / 1024 / 1024) + "MB")
-			socks2httpServer.shutdown()
-			logging.debug("Socks2HTTP Server already shutdown.")
+			#socks2httpServer.shutdown()
+			#logging.debug("Socks2HTTP Server already shutdown.")
 		except Exception:
 			ssr.stopSsr()
-			socks2httpServer.shutdown()
-			logging.debug("Socks2HTTP Server already shutdown.")
+			#socks2httpServer.shutdown()
+			#logging.debug("Socks2HTTP Server already shutdown.")
 			#traceback.print_exc()
 			logging.exception("")
 			sys.exit(1)
@@ -238,9 +242,9 @@ if (__name__ == "__main__"):
 
 	export(Result,EXPORT_TYPE)
 	ssr.stopSsr()
-	if (socks2httpServer):
-		socks2httpServer.shutdown()
-		logging.debug("Socks2HTTP Server already shutdown.")
+	#if (socks2httpServer):
+		#socks2httpServer.shutdown()
+		#logging.debug("Socks2HTTP Server already shutdown.")
 	sys.exit(0)
 #	ssr.stopSsr()
 

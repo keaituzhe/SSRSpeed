@@ -55,11 +55,9 @@ class SpeedTest(object):
 			self.__initSocket()
 			return result["download"] / 8 #bits to bytes
 		elif (method == "FAST"):
-			fast.setProxy(LOCAL_ADDRESS,FAST_PORT)
-			try:
-				result = fast.main()
-			except:
-				pass
+			fast.setProxy(LOCAL_ADDRESS,LOCAL_PORT)
+			result = 0
+			result = fast.fast_com(verbose=True)	
 			#print(result)
 			return result
 		elif (method == "CACHE_FLY"):

@@ -1,136 +1,216 @@
-import re
-from asyncio import ensure_future, gather, get_event_loop, sleep
-from collections import deque
-from statistics import mean
-from time import time
+'''
+Python CLI-tool (without need for a GUI) to measure Internet speed with fast.com
 
-from aiohttp import ClientSession
-import aiohttp
-#from aiosocksy import Socks5Auth
-#from aiosocksy.connector import ProxyConnector, ProxyClientRequest
-#conna = ProxyConnector()
-#socks = 'socks5://127.0.0.1:1087'
-MIN_DURATION = 7
-MAX_DURATION = 30
-STABILITY_DELTA = 2
-MIN_STABLE_MEASUREMENTS = 6
+'''
+import socket
+import socks
+import logging
+import os
+import json
+import urllib.request, urllib.parse, urllib.error
+import sys
+import time
+from threading import Thread
+import traceback
 
-LOCAL_ADDRESS = "127.0.0.1"
-LOCAL_PORT = 1088
-proxy = "http://%s:%d" % (LOCAL_ADDRESS,LOCAL_PORT)
+def setProxy(LOCAL_ADDRESS,LOCAL_PORT):
+	socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5,LOCAL_ADDRESS,LOCAL_PORT)
+	socket.socket = socks.socksocket
 
-total = 0
-done = 0
-sessions = []
+'''
+proxy = {"http":"http://127.0.0.1:1081"}
+proxySupport = urllib.request.ProxyHandler({"http":"http://127.0.0.1:1081"})
+opener = urllib.request.build_opener(proxySupport)
+urllib.request.install_opener(opener)
+'''
 
-def setProxy(address,port):
-    global LOCAL_ADDRESS,LOCAL_PORT,proxy
-    LOCAL_PORT = port
-    LOCAL_ADDRESS = address
-    proxy = "http://%s:%d" % (LOCAL_ADDRESS,LOCAL_PORT)
+def gethtmlresult(url,result,index):
+	'''
+	get the stuff from url in chuncks of size CHUNK, and keep writing the number of bytes retrieved into result[index]
+	'''
+	try:
+		req = urllib.request.urlopen(url)
+	except urllib.error.URLError:
+		result[index] = 0
+		return
 
-async def run():
-    print('fast.com cli')
-    token = await get_token()
-    urls = await get_urls(token)
-    conns = await warmup(urls)
-    future = ensure_future(measure(conns))
-    result = await progress(future)
-    await cleanup()
-    return result
-
-
-async def get_token():
-    async with ClientSession() as s:
-        resp = await s.get('https://fast.com/',proxy=proxy)
-        text = await resp.text()
-        script = re.search(r'<script src="(.*?)">', text).group(1)
-
-        resp = await s.get(f'https://fast.com{script}',proxy=proxy)
-        text = await resp.text()
-        token = re.search(r'token:"(.*?)"', text).group(1)
-    dot()
-    return token
+	CHUNK = 100 * 1024
+	i=1
+	while True:
+			chunk = req.read(CHUNK)
+			if not chunk: break
+			result[index] = i*CHUNK
+			i=i+1
 
 
-async def get_urls(token):
-    async with ClientSession() as s:
-        params = {'https': 'true', 'token': token, 'urlCount': 5}
-        resp = await s.get('https://api.fast.com/netflix/speedtest', params=params,proxy=proxy)
-        data = await resp.json()
-    dot()
-    return [x['url'] for x in data]
+def application_bytes_to_networkbits(bytes):
+	# convert bytes (at application layer) to bits (at network layer)
+	return bytes * 8 * 1.0415
+	# 8 for bits versus bytes
+	# 1.0416 for application versus network layers
 
 
-async def warmup(urls):
-    conns = [get_connection(url) for url in urls]
-    return await gather(*conns)
+def findipv4(fqdn):
+	'''
+		find IPv4 address of fqdn
+	'''
+	import socket
+	ipv4 = socket.getaddrinfo(fqdn, 80, socket.AF_INET)[0][4][0]
+	return ipv4
 
 
-async def get_connection(url):
-    s = ClientSession()
-    sessions.append(s)
-    conn = await s.get(url,proxy=proxy)
-    dot()
-    return conn
+def findipv6(fqdn):
+	'''
+		find IPv6 address of fqdn
+	'''
+	import socket
+	ipv6 = socket.getaddrinfo(fqdn, 80, socket.AF_INET6)[0][4][0]
+	return ipv6
 
 
-async def measure(conns):
-    workers = [measure_speed(conn) for conn in conns]
-    await gather(*workers)
+def fast_com(verbose=False, maxtime=15, forceipv4=False, forceipv6=False):
+	'''
+		verbose: print debug output
+		maxtime: max time in seconds to monitor speedtest
+		forceipv4: force speed test over IPv4
+		forceipv6: force speed test over IPv6
+	'''
+	# go to fast.com to get the javascript file
+	url = 'https://fast.com/'
+	try:
+		urlresult = urllib.request.urlopen(url)
+	except:
+		logging.exception("No connection at all")
+		# no connection at all?
+		return 0
+	response = urlresult.read().decode().strip()
+	for line in response.split('\n'):
+		# We're looking for a line like
+		#           <script src="/app-40647a.js"></script>
+		if line.find('script src') >= 0:
+			jsname = line.split('"')[1] # At time of writing: '/app-40647a.js'
 
 
-async def measure_speed(conn):
-    global total, done
-    chunk_size = 64 * 2**10
-    async for chunk in conn.content.iter_chunked(chunk_size):
-        total += len(chunk)
-    done += 1
+	# From that javascript file, get the token:
+	url = 'https://fast.com' + jsname
+	if verbose: 
+		logging.debug("javascript url is" + url)
+	try:
+		urlresult = urllib.request.urlopen(url)
+	except:
+		# connection is broken
+		return 0
+	allJSstuff = urlresult.read().decode().strip() # this is a obfuscated Javascript file
+	for line in allJSstuff.split(','):
+		if line.find('token:') >= 0:
+			if verbose: 
+				logging.debug("line is" + line)
+			token = line.split('"')[1]
+			if verbose: 
+				logging.debug("token is" + token)
+			if token:
+				break
+
+	# With the token, get the (3) speed-test-URLS from api.fast.com (which will be in JSON format):
+	baseurl = 'https://api.fast.com/'
+	if forceipv4:
+		# force IPv4 by connecting to an IPv4 address of api.fast.com (over ... HTTP)
+		ipv4 = findipv4('api.fast.com')
+		baseurl = 'http://' + ipv4 + '/'  # HTTPS does not work IPv4 addresses, thus use HTTP
+	elif forceipv6:
+		# force IPv6
+		ipv6 = findipv6('api.fast.com')
+		baseurl = 'http://[' + ipv6 + ']/'
+
+	url = baseurl + 'netflix/speedtest?https=true&token=' + token + '&urlCount=3' # Not more than 3 possible
+	if verbose: 
+		logging.debug("API url is" + url)
+	try:
+		urlresult = urllib.request.urlopen(url, None, 2)  # 2 second time-out
+	except:
+		# not good
+		if verbose:
+			logging.exception("No connection possible") # probably IPv6, or just no network
+		return 0  # no connection, thus no speed
+
+	jsonresult = urlresult.read().decode().strip()
+	parsedjson = json.loads(jsonresult)
+
+	# Prepare for getting those URLs in a threaded way:
+	amount = len(parsedjson)
+	if verbose: 
+		logging.debug("Number of URLs:" + str(amount))
+	threads = [None] * amount
+	results = [0] * amount
+	urls = [None] * amount
+	i = 0
+	for jsonelement in parsedjson:
+		urls[i] = jsonelement['url']  # fill out speed test url from the json format
+		if verbose: 
+			logging.debug(jsonelement['url'])
+		i = i+1
+
+	# Let's check whether it's IPv6:
+	for url in urls:
+		fqdn = url.split('/')[2]
+		try:
+			socket.getaddrinfo(fqdn, None, socket.AF_INET6)
+			if verbose: 
+				logging.info("IPv6")
+		except:
+			pass
+
+	# Now start the threads
+	for i in range(len(threads)):
+		#print "Thread: i is", i
+		threads[i] = Thread(target=gethtmlresult, args=(urls[i], results, i))
+		threads[i].daemon=True
+		threads[i].start()
+
+	# Monitor the amount of bytes (and speed) of the threads
+	time.sleep(1)
+	sleepseconds = 3  # 3 seconds sleep
+	lasttotal = 0
+	highestspeedkBps = 0
+	maxdownload = 60 #MB
+	nrloops = int(maxtime / sleepseconds)
+	for loop in range(nrloops):
+		total = 0
+		for i in range(len(threads)):
+			#print i, results[i]
+			total += results[i]
+		delta = total-lasttotal
+		speedkBps = (delta/sleepseconds)/(1024)
+		if verbose:
+			#logging.info("Loop" + loop"Total MB", total/(1024*1024), "Delta MB", delta/(1024*1024), "Speed kB/s:", speedkBps, "aka Mbps %.1f" % (application_bytes_to_networkbits(speedkBps)/1024))
+			logging.info("Loop %s Total %s MB,Delta %s MB,Speed %s KB/s aka %.1f Mbps" % (str(loop),str(total/(1024*1024)),str(delta/(1024*1024)),str(speedkBps),application_bytes_to_networkbits(speedkBps)/1024))
+		lasttotal = total
+		if speedkBps > highestspeedkBps:
+			highestspeedkBps = speedkBps
+		time.sleep(sleepseconds)
 
 
-def stabilized(deltas, elapsed):
-    return (
-        elapsed > MIN_DURATION and
-        len(deltas) > MIN_STABLE_MEASUREMENTS and
-        max(deltas) < STABILITY_DELTA
-    )
+	Mbps = (application_bytes_to_networkbits(highestspeedkBps)/1024)
+	Mbps = float("%.1f" % Mbps)
+	if verbose: 
+		logging.info("Highest Speed (kB/s):" + str(highestspeedkBps) + "aka Mbps "+ str(Mbps))
+
+	return highestspeedkBps*1024
 
 
-async def progress(future):
-    start = time()
-    measurements = deque(maxlen=10)
-    deltas = deque(maxlen=10)
+######## MAIN #################
 
-    while True:
-        await sleep(0.2)
-        elapsed = time() - start
-        speed = total / elapsed / 2**17
-        measurements.append(speed)
+if __name__ == "__main__":
+#	print("let's speed test:")
+#	print("\nSpeed test, without logging:")
+#	print(fast_com())
+#	print("\nSpeed test, with logging:")
+	print(fast_com(verbose=True))
+#	print("\nSpeed test, IPv4, with verbose logging:")
+#	print(fast_com(verbose=True, maxtime=18, forceipv4=True))
+#	print("\nSpeed test, IPv6:")
+#	print(fast_com(maxtime=12, forceipv6=True))
+#	fast_com(verbose=True, maxtime=25)
 
-        print(f'\033[2K\r{speed:.3f} mbps', end='', flush=True)
+#	print("\ndone")
 
-        if len(measurements) == 10:
-            delta = abs(speed - mean(measurements)) / speed * 100
-            deltas.append(delta)
-
-        if done or elapsed > MAX_DURATION or stabilized(deltas, elapsed):
-            future.cancel()
-            return total/elapsed
-
-
-async def cleanup():
-    await gather(*[s.close() for s in sessions])
-    print()
-
-
-def dot():
-    print('.', end='', flush=True)
-
-
-def main():
-    loop = get_event_loop()
-    return loop.run_until_complete(run())
-
-
-if __name__ == '__main__':
-    main()
