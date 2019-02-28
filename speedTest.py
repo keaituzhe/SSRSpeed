@@ -7,6 +7,7 @@ import threading
 import socks
 import socket
 import sys
+import logging
 
 
 import speedtestnet
@@ -40,15 +41,15 @@ class SpeedTest(object):
 		socket.socket = DEFAULT_SOCKET
 
 	def startTest(self,method = "CACHE_FLY"):
-		print("Starting speed test with %s" % method)
+		logging.info("Starting speed test with %s" % method)
 		if (method == "SPEED_TEST_NET"):
 			socks.set_default_proxy(socks.SOCKS5,LOCAL_ADDRESS,LOCAL_PORT)
 			socket.socket = socks.socksocket
-			print("Initializing")
+			logging.info("Initializing")
 			s = speedtestnet.Speedtest()
-			print("Selecting Best Server.")
-			print(s.get_best_server())
-			print("Testing Download...")
+			logging.info("Selecting Best Server.")
+			logging.info(s.get_best_server())
+			logging.info("Testing Download...")
 			s.download()
 			result = s.results.dict()
 			self.__initSocket()
@@ -71,11 +72,11 @@ class SpeedTest(object):
 			raise Exception("Invalid test method %s" % method)
 
 	def googlePing(self):
-		print("Testing latency to google.")
+		logging.info("Testing latency to google.")
 		return cachefly.pinggoogletest(LOCAL_PORT)
 
 	def tcpPing(self,server,port):
-		print("Testing latency to server.")
+		logging.info("Testing latency to server.")
 		return cachefly.pingtcptest(server,port)
 
 #Old Code

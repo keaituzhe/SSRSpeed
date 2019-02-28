@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import time
+import logging
 
 '''
 	resultJson
@@ -73,7 +74,7 @@ def exportAsPng(result):
 		
 	filename = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + ".png"
 	resultImg.save(filename)
-	print("Result image saved as %s" % filename)
+	logging.info("Result image saved as %s" % filename)
 
 def parseSpeed(speed):
 	speed = speed / 1024 / 1024
@@ -102,6 +103,6 @@ def exportAsJson(result):
 	with open(filename,"w+",encoding="utf-8") as f:
 		f.writelines(json.dumps(result,sort_keys=True,indent=4,separators=(',',':')))
 		f.close()
-	print("Result exported as %s" % filename)
+	logging.info("Result exported as %s" % filename)
 
 

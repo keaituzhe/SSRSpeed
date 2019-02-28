@@ -6,6 +6,7 @@ import sys
 import os
 import _thread
 from optparse import OptionParser
+import logging
 
 from shadowsocksR import SSRParse,SSR
 from speedTest import SpeedTest,setInfo
@@ -97,7 +98,7 @@ def export(Result,exType):
 	elif (exType.lower() == "json"):
 		exportAsJson(Result)
 	else:
-		print("Unsupported export type %s" % exType)
+		logigng.error("Unsupported export type %s" % exType)
 		exportAsJson(Result)
 
 if (__name__ == "__main__"):
@@ -133,6 +134,9 @@ if (__name__ == "__main__"):
 
 	if (options.debug):
 		DEBUG = options.debug
+		logging.basicConfig(level=logging.DEBUG,format="[%(asctime)s][%(levelname)s][%(thread)d][%(filename)s:%(lineno)d]%(message)s")
+	else:
+		logging.basicConfig(level=logging.INFO,format="[%(asctime)s][%(levelname)s][%(thread)d][%(filename)s:%(lineno)d] %(message)s")
 
 	if (options.confirmation):
 		SKIP_COMFIRMATION = options.confirmation
@@ -150,7 +154,7 @@ if (__name__ == "__main__"):
 		CONFIG_LOAD_MODE = 2
 		CONFIG_URL = options.url
 	else:
-		print("No config input,exiting...")
+		logging.error("No config input,exiting...")
 		sys.exit(1)
 
 	if (options.filter):
@@ -206,11 +210,11 @@ if (__name__ == "__main__"):
 		_item["group"] = config["group"]
 		_item["remarks"] = config["remarks"]
 		ssr.startSsr(config)
-		print("Starting test for %s - %s" % (_item["group"],_item["remarks"]))
+		logging.info("Starting test for %s - %s" % (_item["group"],_item["remarks"]))
 		time.sleep(1)
 		try:
 			_thread.start_new_thread(socks2httpServer.serve_forever,())
-			print("socks2http server started.")
+			logging.debug("socks2http server started.")
 			st = SpeedTest()
 			_item["dspeed"] = st.startTest(TEST_METHOD)
 			latencyTest = st.tcpPing(config["server"],config["server_port"])
@@ -219,14 +223,15 @@ if (__name__ == "__main__"):
 			_item["ping"] = latencyTest[0]
 			_item["gping"] = st.googlePing()
 			Result.append(_item)
-			print("%s - %s - Loss:%s%% - TCP_Ping:%d - Google_Ping:%d - Speed:%.2f" % (_item["group"],_item["remarks"],_item["loss"] * 100,int(_item["ping"] * 1000),int(_item["gping"] * 1000),_item["dspeed"] / 1024 / 1024) + "MB")
+			logging.info("%s - %s - Loss:%s%% - TCP_Ping:%d - Google_Ping:%d - Speed:%.2f" % (_item["group"],_item["remarks"],_item["loss"] * 100,int(_item["ping"] * 1000),int(_item["gping"] * 1000),_item["dspeed"] / 1024 / 1024) + "MB")
 			socks2httpServer.shutdown()
-			print("Socks2HTTP Server already shutdown.")
+			logging.debug("Socks2HTTP Server already shutdown.")
 		except Exception:
 			ssr.stopSsr()
 			socks2httpServer.shutdown()
-			print("Socks2HTTP Server already shutdown.")
-			traceback.print_exc()
+			logging.debug("Socks2HTTP Server already shutdown.")
+			#traceback.print_exc()
+			logging.exception("")
 			sys.exit(1)
 		ssr.stopSsr()
 		config = ssrp.getNextConfig()
@@ -235,7 +240,7 @@ if (__name__ == "__main__"):
 	ssr.stopSsr()
 	if (socks2httpServer):
 		socks2httpServer.shutdown()
-		print("Socks2HTTP Server already shutdown.")
+		logging.debug("Socks2HTTP Server already shutdown.")
 	sys.exit(0)
 #	ssr.stopSsr()
 

@@ -7,6 +7,7 @@ import struct
 import select
 import re
 import traceback
+import logging
 
 compile_ipv4=re.compile('^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$')
 compile_ipv6=re.compile('(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))')
@@ -55,25 +56,25 @@ class SocksProxy(StreamRequestHandler):
 			return 
 		gg = ddt+self.connection.recv(4096)
 		if gg[0:7]==b'CONNECT':
-			#print("HTTPS")
-			#print(gg)
+			logging.debug("HTTPS")
+			logging.debug(gg)
 			parstr=gg.split(b' ')[1]
 			pos=parstr.rfind(b":")
 			#(host,port)=parstr.split(b':')
 			host=parstr[0:pos]
 			port=parstr[pos+1:]
 			port=int(port)
-			#print(parstr)
+			logging.debug(parstr)
 			self.connection.send(b"HTTP/1.1 200\r\n\r\n")
-			#print(host,port)
+			logging.debug(str((host,port)))
 			remote = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			remote.connect(("127.0.0.1", upstram_port))
 			remote.send(struct.pack("!BBB",5,1,0))
 			remote.recv(2)
 			if host[0:1]==b'[':
 				host=host[1:len(host)-1]
-			#print(host)
-			#print(check_ipv4(host))
+			logging.debug(host)
+			logging.debug(check_ipv4(host))
 			if check_ipv4(host):
 				remote.send(struct.pack("!BBBB4sH",5,1,0,1,socket.inet_aton(host.decode("utf-8")),port))
 				self.recvtrash(remote)
@@ -88,12 +89,12 @@ class SocksProxy(StreamRequestHandler):
 				self.recvtrash(remote)
 				self.exchange_loop(self.connection, remote)
 		else:
-			#print("HTTP")
+			logging.debug("HTTP")
 			tmp=gg.split(b' ')[1].split(b'/')
 			net=tmp[0]+b'//'+tmp[2]
 			request=gg.replace(net,b'')
-			#print(request)
-			#print(gg)
+			logging.debug(request)
+			logging.debug(gg)
 			parstr=tmp[2]
 			port=80
 			pos=parstr.rfind(b":")
@@ -103,16 +104,16 @@ class SocksProxy(StreamRequestHandler):
 				port=int(port)
 			else:
 				host=parstr
-			#print(parstr)
-			#print(host,port)
+			logging.debug(parstr)
+			logging.debug(host,port)
 			remote = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			remote.connect(("127.0.0.1", upstram_port))
 			remote.send(struct.pack("!BBB",5,1,0))
 			remote.recv(2)
 			if host[0:1]==b'[':
 				host=host[1:len(host)-1]
-			#print(host)
-			#print(check_ipv4(host))
+			logging.debug(host)
+			logging.debug(check_ipv4(host))
 			if check_ipv4(host):
 				remote.send(struct.pack("!BBBB4sH",5,1,0,1,socket.inet_aton(host.decode("utf-8")),port))
 				self.recvtrash(remote)

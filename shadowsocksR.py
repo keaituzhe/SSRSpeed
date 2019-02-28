@@ -6,6 +6,7 @@ import subprocess
 import platform
 import os
 import sys
+import logging
 
 import b64plus
 
@@ -38,9 +39,9 @@ class SSR(object):
 			elif(self.__checkPlatform() == "Linux"):
 				self.__process = subprocess.Popen(["python3","./shadowsocksr/shadowsocks/local.py","-c","%s/config.json" % os.getcwd()],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
 			else:
-				print("Your system does not supported.Please contact developer.")
+				logging.error("Your system does not supported.Please contact developer.")
 				sys.exit(1)
-			print("Starting ShadowsocksR with server %s:%d" % (config["server"],config["server_port"]))
+			logging.info("Starting ShadowsocksR with server %s:%d" % (config["server"],config["server_port"]))
 
 		#	print(self.__process.returncode)
 
@@ -50,7 +51,7 @@ class SSR(object):
 			self.__process.terminate()
 	#		print (self.__process.returncode)
 			self.__process = None
-			print("ShadowsocksR terminated.")
+			logging.info("ShadowsocksR terminated.")
 	#	self.__ssrProcess.terminate()
 
 
@@ -121,7 +122,8 @@ class SSRParse(object):
 
 	def printNode(self):
 		for item in self.__configList:
-			print("%s - %s" % (item["group"],item["remarks"]))
+			#print("%s - %s" % (item["group"],item["remarks"]))
+			logging.info("%s - %s" % (item["group"],item["remarks"]))
 
 	def readSubscriptionConfig(self,url):
 		header = {
