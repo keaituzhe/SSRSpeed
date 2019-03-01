@@ -1,5 +1,8 @@
+
 # SSRSpeed
 ShadowsocksR Batch Speed Tool
+
+中文文档请查看 [Readme_ZH_CN](https://github.com/NyanChanMeow/SSRSpeed/blob/master/README_ZH_CN.md)
 
 ## Features
 
@@ -8,7 +11,19 @@ ShadowsocksR Batch Speed Tool
  - Support batch import of SSR configuration from ShadowsocksR-CSharp configuration file and SSPanel-v2, v3 subscription link.
  - Support for importing data from any Json export file and re-exporting files of the specified format.
 
+## Requirements
+
+ - Python >= 3.6
+ - pillow
+ - requests
+ - pysocks
+
+
 ## Getting started
+
+    pip install -r requirements.txt
+    or
+    pip3 install -r requirements.txt
 
     python .\main.py
     Usage: main.py [options] arg1 arg2...
@@ -47,12 +62,6 @@ The parameter priority is as follows:
 >  -f > --fg > --fr
 >  The above sequence indicates that node filtering will be performed in descending order of priority.
 
-## Requirements
-
- - Python >= 3.6
- - pillow
- - requests
- - pysocks
 
 ## Developers
 
