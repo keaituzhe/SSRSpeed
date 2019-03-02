@@ -87,7 +87,7 @@ def mixColor(lc,rc,rt):
 	return (int(lc[0]*(1-rt)+rc[0]*rt),int(lc[1]*(1-rt)+rc[1]*rt),int(lc[2]*(1-rt)+rc[2]*rt))
 
 def getColor(data):
-	if (data > 100 * 1024 * 1024):
+	if (data > 16 * 1024 * 1024):
 		return (255,0,0)
 	elif (data < 64 * 1024):
 		return mixColor((255,255,255),(128,255,0),data/64/1024)
@@ -96,7 +96,7 @@ def getColor(data):
 	elif (data < 4*1024*1024):
 		return mixColor((255,255,0),(255,128,192),(data-512*1024)/(4*1024*1024-512*1024))
 	else:
-		return mixColor((255,128,192),(255,0,0),(data-16*1024*1024)/((100-16)*1024*1024))
+		return mixColor((255,128,192),(255,0,0),(data-4*1024*1024)/((16-4)*1024*1024))
 
 def exportAsJson(result):
 	filename = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + ".json"
