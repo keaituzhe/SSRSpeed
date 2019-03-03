@@ -6,7 +6,7 @@ import os
 import sys
 import time
 import logging
-logger = logging.getLogger("Sub.ExportResult")
+logger = logging.getLogger("Sub")
 
 '''
 	resultJson

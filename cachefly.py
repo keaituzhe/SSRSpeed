@@ -8,7 +8,7 @@ import struct
 import threading
 import requests
 import logging
-logger = logging.getLogger("Sub.CacheFly")
+logger = logging.getLogger("Sub")
 
 
 FLAG=False

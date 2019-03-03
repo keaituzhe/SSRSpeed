@@ -8,7 +8,7 @@ import socks
 import socket
 import sys
 import logging
-logger = logging.getLogger("Sub.SpeedTest")
+logger = logging.getLogger("Sub")
 
 import speedtestnet
 import fast

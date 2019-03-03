@@ -106,10 +106,10 @@ def setOpts(parser):
 def export(Result,exType):
 	if (exType.lower() == "png"):
 		exportAsPng(Result)
-	elif (exType.lower() == "json"):
+	elif ((exType.lower() == "json") or (exType == "")):
 		exportAsJson(Result)
 	else:
-		logigng.error("Unsupported export type %s" % exType)
+		logger.error("Unsupported export type %s" % exType)
 		exportAsJson(Result)
 
 if (__name__ == "__main__"):
@@ -154,6 +154,7 @@ if (__name__ == "__main__"):
 			item.setLevel(logging.INFO)
 			item.addHandler(fileHandler)
 			item.addHandler(consoleHandler)
+
 
 	if (options.confirmation):
 		SKIP_COMFIRMATION = options.confirmation
@@ -272,7 +273,7 @@ if (__name__ == "__main__"):
 			config = ssrp.getNextConfig()
 
 		if (config == None):
-			if (retryMode == True):
+			if ((retryMode == True) or (retryList == [])):
 				break
 			ans = str(input("%d node(s) got 0kb/s,do you want to re-test these node? (Y/N)" % len(retryList))).lower()
 			if (ans == "y"):
