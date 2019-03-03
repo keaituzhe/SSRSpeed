@@ -155,6 +155,7 @@ if (__name__ == "__main__"):
 			item.addHandler(fileHandler)
 			item.addHandler(consoleHandler)
 
+
 	if (options.confirmation):
 		SKIP_COMFIRMATION = options.confirmation
 

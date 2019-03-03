@@ -7,7 +7,7 @@ import platform
 import os
 import sys
 import logging
-logger = logging.getLogger("Sub.ShadowSocksR")
+logger = logging.getLogger("Sub")
 
 import b64plus
 
@@ -36,9 +36,16 @@ class SSR(object):
 			f.close()
 		if (self.__process == None):
 			if (self.__checkPlatform() == "Windows"):
-				self.__process = subprocess.Popen(["python","./shadowsocksr/shadowsocks/local.py","-c","%s/config.json" % os.getcwd()],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+				if (logger.level == logging.DEBUG):
+					print("DEBUG")
+					self.__process = subprocess.Popen(["python","./shadowsocksr/shadowsocks/local.py","-c","%s/config.json" % os.getcwd()])
+				else:
+					self.__process = subprocess.Popen(["python","./shadowsocksr/shadowsocks/local.py","-c","%s/config.json" % os.getcwd()],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
 			elif(self.__checkPlatform() == "Linux"):
-				self.__process = subprocess.Popen(["python3","./shadowsocksr/shadowsocks/local.py","-c","%s/config.json" % os.getcwd()],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+				if (logger.level == logging.DEBUG):
+					self.__process = subprocess.Popen(["python3","./shadowsocksr/shadowsocks/local.py","-c","%s/config.json" % os.getcwd()])
+				else:
+					self.__process = subprocess.Popen(["python3","./shadowsocksr/shadowsocks/local.py","-c","%s/config.json" % os.getcwd()],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
 			else:
 				logger.error("Your system does not supported.Please contact developer.")
 				sys.exit(1)

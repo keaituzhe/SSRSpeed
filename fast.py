@@ -5,7 +5,7 @@ Python CLI-tool (without need for a GUI) to measure Internet speed with fast.com
 import socket
 import socks
 import logging
-logger = logging.getLogger("Sub.Fast")
+logger = logging.getLogger("Sub")
 
 import os
 import json
