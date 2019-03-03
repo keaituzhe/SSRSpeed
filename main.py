@@ -109,7 +109,7 @@ def export(Result,exType):
 	elif (exType.lower() == "json"):
 		exportAsJson(Result)
 	else:
-		logigng.error("Unsupported export type %s" % exType)
+		logger.error("Unsupported export type %s" % exType)
 		exportAsJson(Result)
 
 if (__name__ == "__main__"):
@@ -273,7 +273,7 @@ if (__name__ == "__main__"):
 			config = ssrp.getNextConfig()
 
 		if (config == None):
-			if (retryMode == True):
+			if ((retryMode == True) or (retryList == [])):
 				break
 			ans = str(input("%d node(s) got 0kb/s,do you want to re-test these node? (Y/N)" % len(retryList))).lower()
 			if (ans == "y"):
