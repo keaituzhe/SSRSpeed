@@ -8,6 +8,7 @@ import struct
 import threading
 import requests
 import logging
+logger = logging.getLogger("Sub.CacheFly")
 
 
 FLAG=False
@@ -37,7 +38,7 @@ def testsocketthr():
     nmsl=0
     while True:
         xx=s.recv(4096)
-        logging.debug(xx)
+        logger.debug(xx)
         nmsl+=len(xx)
         if nmsl>=mxv or FLAG:
             break
@@ -45,8 +46,8 @@ def testsocketthr():
     ed=time.time()
     s.close()
     lock.acquire()
-    logging.debug(nmsl)
-    logging.debug(ed-st)
+    logger.debug(nmsl)
+    logger.debug(ed-st)
     ATI+=nmsl
     #ATR+=ed-st
     ATR=max(ATR,ed-st)
@@ -113,7 +114,7 @@ class SpeedTest(object):
             print("\n",end="")
     
     def testthread(self,thid):
-        logging.debug("Thread %d" % thid)
+        logger.debug("Thread %d" % thid)
         size = 0
         starttime = time.time()
         chunkSize = 1024 * 4 #4 KBytes
@@ -133,15 +134,15 @@ class SpeedTest(object):
                         sttim=time.time()
                     else:
                         self.nowsp[thid]=(size-stsiz)/(endtime-sttim)
-                logging.debug(self.nowsp[thid])
-                logging.debug(len(data),(endtime-lastime))
-                logging.debug(data)
+                logger.debug(self.nowsp[thid])
+                logger.debug(len(data),(endtime-lastime))
+                logger.debug(data)
                 if (deltaTime >= self.mxt):
-                    logging.debug(deltaTime,self.mxt)
+                    logger.debug(deltaTime,self.mxt)
                     break
             self.nowsp[thid]=(size-stsiz)/(endtime-sttim)
-            logging.debug(size)
-            logging.debug(size/deltaTime)
+            logger.debug(size)
+            logger.debug(size/deltaTime)
         except:
             return
 
@@ -155,7 +156,7 @@ class SpeedTest(object):
         for i in range(0,times):
             self.__progress(i,times-1)
             time.sleep(0.2)
-        logging.debug(self.mxs)
+        logger.debug(self.mxs)
         return self.mxs
 
     def tcpPing(self):
@@ -182,7 +183,7 @@ def pingtcptest(host,port):
             alt+=time.time()-st
             suc+=1
         except Exception as err:
-            logging.exception("TCP Ping Exception:")
+            logger.exception("TCP Ping Exception:")
             fac+=1
     if suc==0:
         return (0,0)
@@ -205,6 +206,6 @@ def pinggoogletest(port=1080):
             s.close()
             alt+=time.time()-st
         except Exception as err:
-            logging.exception("Google Ping Exception:")
+            logger.exception("Google Ping Exception:")
             alt+=10000
     return alt/2

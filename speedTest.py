@@ -8,7 +8,7 @@ import socks
 import socket
 import sys
 import logging
-
+logger = logging.getLogger("Sub.SpeedTest")
 
 import speedtestnet
 import fast
@@ -17,13 +17,11 @@ import cachefly
 
 LOCAL_ADDRESS = "127.0.0.1"
 LOCAL_PORT = 1087
-FAST_PORT = 1088
 DEFAULT_SOCKET = socket.socket
 
-def setInfo(ADDRESS,PORT,FAST):
+def setInfo(ADDRESS,PORT):
 	LOCAL_ADDRESS = ADDRESS
 	LOCAL_PORT = PORT
-	FAST_PORT = FAST
 
 class SpeedTest(object):
 	def __init__(self):
@@ -41,40 +39,55 @@ class SpeedTest(object):
 		socket.socket = DEFAULT_SOCKET
 
 	def startTest(self,method = "CACHE_FLY"):
-		logging.info("Starting speed test with %s" % method)
+		logger.info("Starting speed test with %s" % method)
 		if (method == "SPEED_TEST_NET"):
-			socks.set_default_proxy(socks.SOCKS5,LOCAL_ADDRESS,LOCAL_PORT)
-			socket.socket = socks.socksocket
-			logging.info("Initializing")
-			s = speedtestnet.Speedtest()
-			logging.info("Selecting Best Server.")
-			logging.info(s.get_best_server())
-			logging.info("Testing Download...")
-			s.download()
-			result = s.results.dict()
-			self.__initSocket()
-			return result["download"] / 8 #bits to bytes
+			try:
+				socks.set_default_proxy(socks.SOCKS5,LOCAL_ADDRESS,LOCAL_PORT)
+				socket.socket = socks.socksocket
+				logger.info("Initializing")
+				s = speedtestnet.Speedtest()
+				logger.info("Selecting Best Server.")
+				logger.info(s.get_best_server())
+				logger.info("Testing Download...")
+				s.download()
+				result = s.results.dict()
+				self.__initSocket()
+				return result["download"] / 8 #bits to bytes
+			except:
+				logger.exception("")
+				return 0
 		elif (method == "FAST"):
-			fast.setProxy(LOCAL_ADDRESS,LOCAL_PORT)
-			result = 0
-			result = fast.fast_com(verbose=True)	
-			#print(result)
-			return result
+			try:
+				fast.setProxy(LOCAL_ADDRESS,LOCAL_PORT)
+				result = 0
+				result = fast.fast_com(verbose=True)	
+				#print(result)
+				return result
+			except:
+				logger.exception("")
+				return 0
 		elif (method == "CACHE_FLY"):
-			return cachefly.speedtestcachefly(LOCAL_PORT)
-
+			try:
+				return cachefly.speedtestcachefly(LOCAL_PORT)
+			except:
+				logger.exception("")
+				return 0
 		elif (method == "SOCKET"):#Old speedtest
-			return cachefly.speedtestsocket(LOCAL_PORT)
+			try:
+				return cachefly.speedtestsocket(LOCAL_PORT)
+			except:
+				logger.exception("")
+				return 0
 
 		else:
 			raise Exception("Invalid test method %s" % method)
 
 	def googlePing(self):
-		logging.info("Testing latency to google.")
+		logger.info("Testing latency to google.")
 		return cachefly.pinggoogletest(LOCAL_PORT)
 
 	def tcpPing(self,server,port):
-		logging.info("Testing latency to server.")
+		logger.info("Testing latency to server.")
 		return cachefly.pingtcptest(server,port)
 
 #Old Code
