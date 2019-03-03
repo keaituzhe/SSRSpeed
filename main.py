@@ -234,15 +234,16 @@ if (__name__ == "__main__"):
 		logger.info("Starting test for %s - %s" % (_item["group"],_item["remarks"]))
 		time.sleep(1)
 		try:
+			st = SpeedTest()
+			latencyTest = st.tcpPing(config["server"],config["server_port"])
+			time.sleep(1)
 			#_thread.start_new_thread(socks2httpServer.serve_forever,())
 			#logger.debug("socks2http server started.")
-			st = SpeedTest()
 			_item["dspeed"] = st.startTest(TEST_METHOD)
 			time.sleep(0.2)
 			ssr.stopSsr()
+			time.sleep(0.2)
 			ssr.startSsr(config)
-			time.sleep(1)
-			latencyTest = st.tcpPing(config["server"],config["server_port"])
 		#	.print (latencyTest)
 			_item["loss"] = 1 - latencyTest[1]
 			_item["ping"] = latencyTest[0]
