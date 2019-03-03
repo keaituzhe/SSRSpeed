@@ -106,7 +106,7 @@ def setOpts(parser):
 def export(Result,exType):
 	if (exType.lower() == "png"):
 		exportAsPng(Result)
-	elif (exType.lower() == "json"):
+	elif ((exType.lower() == "json") or (exType == "")):
 		exportAsJson(Result)
 	else:
 		logger.error("Unsupported export type %s" % exType)
