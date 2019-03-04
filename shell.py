@@ -5,7 +5,7 @@ import sys
 import logging
 logger = logging.getLogger("Sub")
 
-from exportself.__result import exportAsPng,exportAsJson
+from exportResult import exportAsPng,exportAsJson
 from shadowsocksR import SSRParse,SSR
 from speedTest import SpeedTest,setInfo
 import importResult
@@ -22,24 +22,26 @@ class ConsoleUi(object):
 
 	def __showHelp(self):
 		logger.info("Show Console Help.")
-		print("h\n		Show this message.")
-		print("c CONFIG_FILE\n		Import shadowsocksr config from config file.")
-		print("u URL\n		Import shadowsocksr config from subscription link.")
-		print("m METHOD\n		Select test medhod in speedtestnet,fast and cachefly.")
-		print("f KEYWORD\n		Filter nodes by group and remarks using keyword.")
-		print("fr KEYWORD\n		Filter nodes by remarks using keyword.")
-		print("fg KEYWORD\n		Filter nodes by group using keyword.")
-		print("l\n		Show nodes in the list.")
-		print("e\n		Start test.")
-		print("e TYPE\n		Export test result to json or png file,now supported 'png' or 'json'")
-		print("i FILENAME\n		Import test result from json file and export it.")
-		print("q\n		Exit.")
+		print("Options: ")
+		print("	h\n	         Show this message.")
+		print("	c CONFIG_FILE\n	         Import shadowsocksr config from config file.")
+		print("	u URL\n	         Import shadowsocksr config from subscription link.")
+		print("	m METHOD\n	         Select test medhod in speedtestnet,fast and cachefly.")
+		print("	f KEYWORD\n	         Filter nodes by group and remarks using keyword.")
+		print("	fr KEYWORD\n	         Filter nodes by remarks using keyword.")
+		print("	fg KEYWORD\n	         Filter nodes by group using keyword.")
+		print("	l\n	         Show nodes in the list.")
+		print("	e\n	         Start test.")
+		print("	e TYPE\n	         Export test result to json or png file,now supported 'png' or 'json'")
+		print("	i FILENAME\n	         Import test result from json file and export it.")
+		print("	q\n	         Exit.")
 		print("")
 
 	def run(self):
 		print("type 'h' for help.")
 		while (True):
 			cmds = input("> ")
+			logger.debug("User input : '%s'" % str(cmds))
 			cmdList = cmds.split(" ")
 			cmd = cmdList[0]
 			if (cmd == "h"):

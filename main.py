@@ -115,7 +115,6 @@ def export(Result,exType):
 		exportAsJson(Result)
 
 if (__name__ == "__main__"):
-	setInfo(LOCAL_ADDRESS,LOCAL_PORT)
 	#setUpstreamPort(LOCAL_PORT)
 
 	DEBUG = False
@@ -161,6 +160,8 @@ if (__name__ == "__main__"):
 	import importResult
 	#from socks2http import ThreadingTCPServer,SocksProxy
 	#from socks2http import setUpstreamPort
+	
+	setInfo(LOCAL_ADDRESS,LOCAL_PORT)
 
 	#print(options.test_method)
 	if (options.test_method == "speedtestnet"):
