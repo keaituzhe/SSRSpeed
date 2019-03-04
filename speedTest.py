@@ -50,6 +50,7 @@ class SpeedTest(object):
 				logger.info(s.get_best_server())
 				logger.info("Testing Download...")
 				s.download()
+				socket.socket = DEFAULT_SOCKET
 				result = s.results.dict()
 				self.__initSocket()
 				return result["download"] / 8 #bits to bytes
@@ -60,7 +61,8 @@ class SpeedTest(object):
 			try:
 				fast.setProxy(LOCAL_ADDRESS,LOCAL_PORT)
 				result = 0
-				result = fast.fast_com(verbose=True)	
+				result = fast.fast_com(verbose=True)
+				socket.socket = DEFAULT_SOCKET
 				#print(result)
 				return result
 			except:
