@@ -118,7 +118,7 @@ class SSRParse(object):
 				_list.append(item)
 		self.__configList = _list
 
-	def filterNode(self,kw,gkw,rkw):
+	def filterNode(self,kw = "",gkw = "",rkw = ""):
 		_list = []
 		if (kw != ""):
 			for item in self.__configList:
@@ -144,6 +144,8 @@ class SSRParse(object):
 			if (link[:6] != "ssr://"):continue
 			link = link[6:]
 			self.__configList.append(self.__parseLink(link))
+
+		logger.info("Read %d node(s)" % len(self.__configList))
 			
 	def readGuiConfig(self,filename):
 		with open(filename,"r",encoding="utf-8") as f:
@@ -166,6 +168,8 @@ class SSRParse(object):
 				}
 				self.__configList.append(_dict)
 			f.close()
+
+		logger.info("Read %d node(s)" % len(self.__configList))
 
 	def getNextConfig(self):
 		if (self.__configList != []):
