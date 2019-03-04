@@ -20,18 +20,20 @@ fileHandler.setFormatter(formatter)
 consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(formatter)
 
-from shadowsocksR import SSRParse,SSR
-from speedTest import SpeedTest,setInfo
-from exportResult import exportAsPng,exportAsJson
-import importResult
-#from socks2http import ThreadingTCPServer,SocksProxy
-#from socks2http import setUpstreamPort
+from shell import ConsoleUi
 
 VERSION = "0.2b"
 LOCAL_ADDRESS = "127.0.0.1"
 LOCAL_PORT = 1087
 
 def setOpts(parser):
+	parser.add_option(
+		"--cli",
+		action="store_true",
+		dest="enableCli",
+		default=False,
+		help="Using console interface instead of command line."
+		)
 	parser.add_option(
 		"-c","--config",
 		action="store",
@@ -133,16 +135,6 @@ if (__name__ == "__main__"):
 	setOpts(parser)
 	(options,args) = parser.parse_args()
 
-	#print(options.test_method)
-	if (options.test_method == "speedtestnet"):
-		TEST_METHOD = "SPEED_TEST_NET"
-	elif(options.test_method == "fast"):
-		TEST_METHOD = "FAST"
-	elif(options.test_method == "cachefly"):
-		TEST_METHOD = "CACHE_FLY"
-	else:
-		TEST_METHOD = "CACHE_FLY"
-
 	if (options.debug):
 		DEBUG = options.debug
 		for item in loggerList:
@@ -154,6 +146,32 @@ if (__name__ == "__main__"):
 			item.setLevel(logging.INFO)
 			item.addHandler(fileHandler)
 			item.addHandler(consoleHandler)
+
+	if (logger.level == logging.DEBUG):
+		logger.debug("Program running in debug mode")
+
+	if (options.enableCli):
+		cui = ConsoleUi()
+		cui.run()
+		sys.exit(0)
+
+	from shadowsocksR import SSRParse,SSR
+	from speedTest import SpeedTest,setInfo
+	from exportResult import exportAsPng,exportAsJson
+	import importResult
+	#from socks2http import ThreadingTCPServer,SocksProxy
+	#from socks2http import setUpstreamPort
+
+	#print(options.test_method)
+	if (options.test_method == "speedtestnet"):
+		TEST_METHOD = "SPEED_TEST_NET"
+	elif(options.test_method == "fast"):
+		TEST_METHOD = "FAST"
+	elif(options.test_method == "cachefly"):
+		TEST_METHOD = "CACHE_FLY"
+	else:
+		TEST_METHOD = "CACHE_FLY"
+
 
 
 	if (options.confirmation):
