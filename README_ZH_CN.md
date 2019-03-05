@@ -76,7 +76,7 @@ ShadowsocksR 批量测速工具
                      Filter nodes by group using keyword.
             l
                      Show nodes in the list.
-            e
+            t
                      Start test.
             e TYPE
                      Export test result to json or png file,now supported 'png' or 'json'
@@ -123,7 +123,7 @@ ShadowsocksR 批量测速工具
                          过滤出组名中含有关键字的节点
                 l
                          显示当前待测试的节点
-                e
+                t
                          开始测试
                 e TYPE
                          导出测试数据，当前支持 png 和 json 格式
