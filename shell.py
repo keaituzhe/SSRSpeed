@@ -78,6 +78,7 @@ class ConsoleUi(object):
 				self.__ssrp.printNode()
 				continue
 			elif(cmd == "t"):
+				retryMode = False
 				config = self.__ssrp.getNextConfig()
 				while (True):
 					_item = {}
@@ -92,7 +93,7 @@ class ConsoleUi(object):
 						time.sleep(1)
 						#_thread.start_new_thread(socks2httpServer.serve_forever,())
 						#logger.debug("socks2http server started.")
-						_item["dspeed"] = st.startTest(TEST_METHOD)
+						_item["dspeed"] = st.startTest(self.__method)
 						time.sleep(0.2)
 						self.__ssr.stopSsr()
 						time.sleep(0.2)
@@ -124,7 +125,7 @@ class ConsoleUi(object):
 						else:
 							config = None
 					else:
-						config = ssrp.getNextConfig()
+						config = self.__ssrp.getNextConfig()
 
 					if (config == None):
 						if ((retryMode == True) or (self.__retryList == [])):
