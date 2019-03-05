@@ -20,9 +20,10 @@ logger = logging.getLogger("Sub")
 		}
 '''
 
+
 def exportAsPng(result):
 	imageHeight = len(result) * 30 + 30
-	resultImg = Image.new("RGB",(780,imageHeight),(255,255,255))
+	resultImg = Image.new("RGB",(730,imageHeight),(255,255,255))
 	resultFont = ImageFont.truetype("msyh.ttc",18)
 	draw = ImageDraw.Draw(resultImg)
 
@@ -31,14 +32,14 @@ def exportAsPng(result):
 	draw.line((520,0,520,imageHeight - 1),fill=(127,127,127),width=1)
 	draw.line((580,0,580,imageHeight - 1),fill=(127,127,127),width=1)
 	draw.line((640,0,640,imageHeight - 1),fill=(127,127,127),width=1)
-	draw.line((700,0,700,imageHeight - 1),fill=(127,127,127),width=1)
+#	draw.line((700,0,700,imageHeight - 1),fill=(127,127,127),width=1)
 	draw.text((5,4),"Group",font=resultFont,fill=(0,0,0))
 	draw.text((165,4),"Remarks",font=resultFont,fill=(0,0,0))
 	draw.text((525,4),"Loss",font=resultFont,fill=(0,0,0))
 	draw.text((585,4),"Ping",font=resultFont,fill=(0,0,0))
-	draw.text((645,4),"GPing",font=resultFont,fill=(0,0,0))
-	draw.text((705,4),"DSpeed",font=resultFont,fill=(0,0,0))
-	draw.line((0,30,779,30),fill=(127,127,127),width=1)
+#	draw.text((645,4),"GPing",font=resultFont,fill=(0,0,0))
+	draw.text((645,4),"DSpeed",font=resultFont,fill=(0,0,0))
+	draw.line((0,30,729,30),fill=(127,127,127),width=1)
 
 	for i in range(0,len(result)):
 		draw.line((0,30 * i + 60,779,30 * i + 60),fill=(127,127,127),width=1)
@@ -64,14 +65,15 @@ def exportAsPng(result):
 			ping = ping[:-1]
 		draw.text((585,30 * i + 30 + 4),ping,font=resultFont,fill=(0,0,0))
 
-		gping = str(item["gping"] * 1000)
-		while(draw.textsize(gping,font=resultFont)[0] > 50):
-			gping = gping[:-1]
-		draw.text((645,30 * i + 30 + 4),gping,font=resultFont,fill=(0,0,0))
+	#	gping = str(item["gping"] * 1000)
+	#	while(draw.textsize(gping,font=resultFont)[0] > 50):
+	#		gping = gping[:-1]
+	#	draw.text((645,30 * i + 30 + 4),gping,font=resultFont,fill=(0,0,0))
 
 		speed = item["dspeed"]
-		draw.rectangle((701,30 * i + 30 + 1,779,30 * i + 60 -1),getColor(speed))
-		draw.text((705,30 * i + 30 + 1),parseSpeed(speed),font=resultFont,fill=(0,0,0))
+	#	draw.rectangle((701,30 * i + 30 + 1,779,30 * i + 60 -1),getColor(speed))
+		draw.rectangle((641,30 * i + 30 + 1,729,30 * i + 60 -1),getColor(speed))
+		draw.text((645,30 * i + 30 + 1),parseSpeed(speed),font=resultFont,fill=(0,0,0))
 		
 	filename = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + ".png"
 	resultImg.save(filename)
