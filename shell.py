@@ -1,7 +1,8 @@
 #coding:utf-8
 
-import os 
 import sys
+import os 
+import time
 import logging
 logger = logging.getLogger("Sub")
 
@@ -31,7 +32,7 @@ class ConsoleUi(object):
 		print("	fr KEYWORD\n	         Filter nodes by remarks using keyword.")
 		print("	fg KEYWORD\n	         Filter nodes by group using keyword.")
 		print("	l\n	         Show nodes in the list.")
-		print("	e\n	         Start test.")
+		print("	t\n	         Start test.")
 		print("	e TYPE\n	         Export test result to json or png file,now supported 'png' or 'json'")
 		print("	i FILENAME\n	         Import test result from json file and export it.")
 		print("	q\n	         Exit.")
