@@ -31,6 +31,7 @@ class SSR(object):
 
 	def startSsr(self,config):
 		self.__config = config
+		self.__config["server_port"] = int(self.__config["server_port"])
 		with open("./config.json","w+",encoding="utf-8") as f:
 			f.write(json.dumps(self.__config))
 			f.close()
