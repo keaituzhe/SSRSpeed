@@ -52,7 +52,7 @@ class ConsoleUi(object):
 				self.__ssrp.readGuiConfig(cmdList[1])
 				continue
 			elif(cmd == "u"):
-				self.__ssrp.readreadSubscriptionConfig(cmdList[1])
+				self.__ssrp.readSubscriptionConfig(cmdList[1])
 				continue
 			elif(cmd == "m"):
 				if (cmdList[1] == "speedtestnet"):
