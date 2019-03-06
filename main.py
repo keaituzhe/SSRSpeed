@@ -249,6 +249,7 @@ if (__name__ == "__main__"):
 		_item = {}
 		_item["group"] = config["group"]
 		_item["remarks"] = config["remarks"]
+		config["server_port"] = int(config["server_port"])
 		ssr.startSsr(config)
 		logger.info("Starting test for %s - %s" % (_item["group"],_item["remarks"]))
 		time.sleep(1)
