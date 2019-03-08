@@ -27,8 +27,6 @@ fileHandler.setFormatter(formatter)
 consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(formatter)
 
-from shell import ConsoleUi
-
 VERSION = "1.0 stable"
 LOCAL_ADDRESS = "127.0.0.1"
 LOCAL_PORT = 1087
