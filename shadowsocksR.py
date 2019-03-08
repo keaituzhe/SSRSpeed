@@ -129,6 +129,33 @@ class SSRParse(object):
 		self.__filterGroup(gkw)
 		self.__filterRemark(rkw)
 
+	def __excludeGroup(self,gkw):
+		_list = []
+		if (gkw == ""):return
+		for item in self.__configList:
+			if (gkw not in item["group"]):
+				_list.append(item)
+		self.__configList = _list
+
+	def __excludeRemark(self,rkw):
+		_list = []
+		if (rkw == ""):return
+		for item in self.__configList:
+			if (rkw not in item["remarks"]):
+				_list.append(item)
+		self.__configList = _list
+
+	def excludeNode(self,kw = "",gkw = "",rkw = ""):
+	#	print((kw,gkw,rkw))
+		_list = []
+		if (kw != ""):
+			for item in self.__configList:
+				if ((kw not in item["group"]) and (kw not in item["remarks"])):
+					_list.append(item)
+			self.__configList = _list
+		self.__excludeGroup(gkw)
+		self.__excludeRemark(rkw)
+
 	def printNode(self):
 		for item in self.__configList:
 			#print("%s - %s" % (item["group"],item["remarks"]))

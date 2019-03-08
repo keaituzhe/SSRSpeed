@@ -38,7 +38,7 @@ def testsocketthr():
     nmsl=0
     while True:
         xx=s.recv(4096)
-        logger.debug(xx)
+    #    logger.debug(xx)
         nmsl+=len(xx)
         if nmsl>=mxv or FLAG:
             break
@@ -46,8 +46,8 @@ def testsocketthr():
     ed=time.time()
     s.close()
     lock.acquire()
-    logger.debug(nmsl)
-    logger.debug(ed-st)
+#    logger.debug(nmsl)
+#    logger.debug(ed-st)
     ATI+=nmsl
     #ATR+=ed-st
     ATR=max(ATR,ed-st)
@@ -136,7 +136,7 @@ class SpeedTest(object):
                         self.nowsp[thid]=(size-stsiz)/(endtime-sttim)
                 logger.debug(self.nowsp[thid])
                 logger.debug(len(data),(endtime-lastime))
-                logger.debug(data)
+            #    logger.debug(data)
                 if (deltaTime >= self.mxt):
                     logger.debug(deltaTime,self.mxt)
                     break
