@@ -8,6 +8,13 @@ import _thread
 from optparse import OptionParser
 import logging
 
+from shadowsocksR import SSRParse,SSR
+from speedTest import SpeedTest,setInfo
+from exportResult import exportAsPng,exportAsJson
+import importResult
+#from socks2http import ThreadingTCPServer,SocksProxy
+#from socks2http import setUpstreamPort
+
 loggerList = []
 loggerSub = logging.getLogger("Sub")
 logger = logging.getLogger(__name__)
@@ -22,18 +29,11 @@ consoleHandler.setFormatter(formatter)
 
 from shell import ConsoleUi
 
-VERSION = "0.2b"
+VERSION = "1.0 stable"
 LOCAL_ADDRESS = "127.0.0.1"
 LOCAL_PORT = 1087
 
 def setOpts(parser):
-	parser.add_option(
-		"--cli",
-		action="store_true",
-		dest="enableCli",
-		default=False,
-		help="Using console interface instead of command line."
-		)
 	parser.add_option(
 		"-c","--config",
 		action="store",
@@ -52,29 +52,50 @@ def setOpts(parser):
 		"-m","--method",
 		action="store",
 		dest="test_method",
-		default="cachefly",
-		help="Select test method in speedtestnet,cachefly and fast"
+		default="speedtestnet",
+		help="Select test method in [speedtestnet,fast,cachefly,socket]"
 		)
 	parser.add_option(
-		"-f","--filter",
+		"--include",
 		action="store",
 		dest="filter",
 		default = "",
 		help="Filter nodes by group and remarks using keyword."
 		)
 	parser.add_option(
-		"--fr","--fremark",
+		"--include-remark",
 		action="store",
 		dest="remarks",
 		default="",
 		help="Filter nodes by remarks using keyword."
 		)
 	parser.add_option(
-		"--fg","--fgroup",
+		"--include-group",
 		action="store",
 		dest="group",
 		default="",
 		help="Filter nodes by group name using keyword."
+		)
+	parser.add_option(
+		"--exclude",
+		action="store",
+		dest="efliter",
+		default = "",
+		help="Exclude nodes by group and remarks using keyword."
+		)
+	parser.add_option(
+		"--exclude-group",
+		action="store",
+		dest="egfilter",
+		default = "",
+		help="Exclude nodes by group using keyword."
+		)
+	parser.add_option(
+		"--exclude-remark",
+		action="store",
+		dest="erfilter",
+		default = "",
+		help="Exclude nodes by remarks using keyword."
 		)
 	parser.add_option(
 		"-y","--yes",
@@ -125,6 +146,9 @@ if (__name__ == "__main__"):
 	FILTER_KEYWORD = ""
 	FILTER_GROUP_KRYWORD = ""
 	FILTER_REMARK_KEYWORD = ""
+	EXCLUDE_KEYWORD = ""
+	EXCLUDE_GROUP_KEYWORD = ""
+	EXCLUDE_REMARK_KEWORD = ""
 	TEST_METHOD = ""
 	SKIP_COMFIRMATION = False
 	EXPORT_TYPE = ""
@@ -148,18 +172,6 @@ if (__name__ == "__main__"):
 
 	if (logger.level == logging.DEBUG):
 		logger.debug("Program running in debug mode")
-
-	if (options.enableCli):
-		cui = ConsoleUi()
-		cui.run()
-		sys.exit(0)
-
-	from shadowsocksR import SSRParse,SSR
-	from speedTest import SpeedTest,setInfo
-	from exportResult import exportAsPng,exportAsJson
-	import importResult
-	#from socks2http import ThreadingTCPServer,SocksProxy
-	#from socks2http import setUpstreamPort
 	
 	setInfo(LOCAL_ADDRESS,LOCAL_PORT)
 
@@ -171,7 +183,7 @@ if (__name__ == "__main__"):
 	elif(options.test_method == "cachefly"):
 		TEST_METHOD = "CACHE_FLY"
 	else:
-		TEST_METHOD = "CACHE_FLY"
+		TEST_METHOD = "SOCKET"
 
 
 
@@ -196,11 +208,18 @@ if (__name__ == "__main__"):
 
 
 	if (options.filter):
-		FILTER_KEYWORD = options.filter
+		FILTER_KEYWORD = str(options.filter)
 	if (options.group):
-		FILTER_GROUP_KRYWORD = options.group
+		FILTER_GROUP_KRYWORD = str(options.group)
 	if (options.remarks):
-		FILTER_REMARK_KEYWORD = options.remarks
+		FILTER_REMARK_KEYWORD = str(options.remarks)
+
+	if (options.efliter):
+		EXCLUDE_KEYWORD = str(options.efliter)
+	if (options.egfilter):
+		EXCLUDE_GROUP_KEYWORD = str(options.egfilter)
+	if (options.erfilter):
+		EXCLUDE_REMARK_KEWORD = str(options.erfilter)
 
 	if (options.export_file_type):
 		EXPORT_TYPE = options.export_file_type.lower()
@@ -219,6 +238,7 @@ if (__name__ == "__main__"):
 	else:
 		ssrp.readSubscriptionConfig(CONFIG_URL)
 	ssrp.filterNode(FILTER_KEYWORD,FILTER_GROUP_KRYWORD,FILTER_REMARK_KEYWORD)
+	ssrp.excludeNode(EXCLUDE_KEYWORD,EXCLUDE_GROUP_KEYWORD,EXCLUDE_REMARK_KEWORD)
 	ssrp.printNode()
 	if (not SKIP_COMFIRMATION):
 		ans = input("Before the test please confirm the nodes,Ctrl-C to exit. (Y/N)")
@@ -270,7 +290,8 @@ if (__name__ == "__main__"):
 		#	_item["gping"] = st.googlePing()
 			_item["gping"] = 0
 			if ((int(_item["dspeed"]) == 0) and (retryMode == False)):
-				retryList.append(_item)
+			#	retryList.append(_item)
+				Result.append(_item)
 				retryConfig.append(config)
 			else:
 				Result.append(_item)
@@ -305,7 +326,12 @@ if (__name__ == "__main__"):
 				continue
 			else:
 				for r in retryList:
-					Result.append(r)
+					for s in range(0,len(Result)):
+						if (r["remarks"] == Result[s]["remarks"]):
+							Result[s]["dspeed"] = r["dspeed"]
+							Result[s]["ping"] = r["ping"]
+							Result[s]["loss"] = r["loss"]
+							break
 				break
 
 	export(Result,EXPORT_TYPE)
