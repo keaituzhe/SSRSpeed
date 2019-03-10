@@ -24,7 +24,7 @@ logger = logging.getLogger("Sub")
 def exportAsPng(result):
 	imageHeight = len(result) * 30 + 30
 	resultImg = Image.new("RGB",(730,imageHeight),(255,255,255))
-	resultFont = ImageFont.truetype("msyh.ttc",18)
+	resultFont = ImageFont.truetype("msyh.ttf",18)
 	draw = ImageDraw.Draw(resultImg)
 
 	draw.line((0,0,0,imageHeight - 1),fill=(127,127,127),width=1)
